@@ -1,0 +1,14 @@
+{
+  "name": "feed-generator-bsky",
+  "version": "1.0.0",
+  "description": "Feed generator para Bluesky con persistencia en GitHub",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "license": "MIT"
+}

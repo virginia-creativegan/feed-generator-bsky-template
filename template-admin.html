@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestor de feeds</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a18; padding: 2rem; }
+    h1 { font-size: 1.4rem; font-weight: 500; margin-bottom: 2rem; }
+    h2 { font-size: 1rem; font-weight: 500; margin-bottom: 1rem; color: #444; }
+    .card { background: white; border-radius: 8px; border: 1px solid #e0e0d8; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 600px; }
+    label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 4px; margin-top: 12px; }
+    input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; font-family: inherit; }
+    button { margin-top: 1rem; padding: 9px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
+    button:hover { background: #245a41; }
+    .hint { font-size: 0.8rem; color: #888; margin-top: 4px; }
+    #msg, #msg2, #msg3, #msg4 { margin-top: 1rem; font-size: 0.9rem; padding: 8px 12px; border-radius: 6px; display: none; }
+    .ok { background: #e8f5e9; color: #2e7d32; }
+    .err { background: #fdecea; color: #c62828; }
+    .key-input { display: flex; gap: 8px; }
+    .key-input input { flex: 1; }
+    #posts-list { margin-top: 1rem; font-size: 0.85rem; }
+    .post-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0e8; }
+    .post-uri { color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
+    .del-btn { background: #c62828; padding: 4px 10px; font-size: 0.8rem; margin-top: 0; flex-shrink: 0; }
+    #msgKey { margin-top: 0.5rem; font-size: 0.85rem; color: #2e7d32; display: none; }
+  </style>
+</head>
+<body>
+  <h1>🌿 Gestor de feeds</h1>
+
+  <div class="card">
+    <h2>Clave de administración</h2>
+    <div class="key-input">
+      <input type="password" id="adminKey" placeholder="Introduce tu clave de administración">
+      <button onclick="saveKey()">Guardar</button>
+    </div>
+    <div id="msgKey">✓ Clave guardada</div>
+  </div>
+
+  <div class="card">
+    <h2>Añadir post a un feed</h2>
+    <label>URL del post en Bluesky</label>
+    <input type="text" id="postUrl" placeholder="https://bsky.app/profile/.../post/...">
+    <label>ID del feed</label>
+    <p class="hint">Feeds actuales: DDAA (Derechos Animales)</p>
+    <input type="text" id="feedInput" placeholder="ej: DDAA">
+    <button onclick="addPost()">Añadir post</button>
+    <div id="msg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Crear nuevo feed</h2>
+    <label>Cuenta</label>
+    <select id="newDid">
+      <option value="TU-DID-CUENTA-1">Cuenta 1 (@tu-handle-1)</option>
+      <option value="TU-DID-CUENTA-2">Cuenta 2 (@tu-handle-2)</option>
+    </select>
+    <label>ID (sin espacios ni caracteres especiales)</label>
+    <input type="text" id="newId" placeholder="mi-feed">
+    <label>Nombre</label>
+    <input type="text" id="newName" placeholder="Nombre del feed">
+    <label>Descripción</label>
+    <textarea id="newDesc" rows="2" placeholder="Descripción breve"></textarea>
+    <button onclick="createFeed()">Crear feed</button>
+    <div id="msg2"></div>
+    <div id="feedUrl" style="margin-top:0.75rem;display:none">
+      <a id="feedUrlLink" href="" target="_blank" style="font-size:0.9rem;color:#2d6a4f">→ Abrir feed en Bluesky y anclar con 📌</a>
+    </div>
+    <p class="hint" style="margin-top:1rem">⚠️ Después de crear el feed aquí, regístralo en Bluesky con la sección de abajo para que aparezca en tu perfil.</p>
+  </div>
+
+  <div class="card">
+    <h2>Registrar feed en Bluesky</h2>
+    <p class="hint">Después de crear un feed aquí, regístralo en Bluesky para que aparezca en tu perfil.</p>
+    <label>Cuenta (handle de Bluesky)</label>
+    <select id="regIdentifier">
+      <option value="tu-handle-1">tu-handle-1</option>
+      <option value="tu-handle-2">tu-handle-2</option>
+    </select>
+    <label>App Password de esa cuenta</label>
+    <input type="password" id="regAppPassword" placeholder="xxxx-xxxx-xxxx-xxxx">
+    <label>ID del feed a registrar</label>
+    <input type="text" id="regFeedId" placeholder="ej: DDAA, Cocina">
+    <label>Icono del feed (opcional, PNG o JPG, máx. 1MB)</label>
+    <input type="file" id="regAvatar" accept="image/png,image/jpeg">
+    <button onclick="registerFeed()">Registrar en Bluesky</button>
+    <div id="msg3"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cambiar icono de un feed</h2>
+    <label>Cuenta (handle de Bluesky)</label>
+    <select id="iconIdentifier">
+      <option value="tu-handle-1">tu-handle-1</option>
+      <option value="tu-handle-2">tu-handle-2</option>
+    </select>
+    <label>App Password de esa cuenta</label>
+    <input type="password" id="iconAppPassword" placeholder="xxxx-xxxx-xxxx-xxxx">
+    <label>ID del feed</label>
+    <input type="text" id="iconFeedId" placeholder="ej: DDAA, Cocina">
+    <label>Nuevo icono (PNG o JPG, máx. 1MB)</label>
+    <input type="file" id="iconAvatar" accept="image/png,image/jpeg">
+    <button onclick="changeIcon()">Cambiar icono</button>
+    <div id="msg4"></div>
+  </div>
+
+<script>
+  const SERVER = window.location.origin
+
+  function getKey() {
+    return localStorage.getItem('adminKey') || ''
+  }
+
+  function saveKey() {
+    const val = document.getElementById('adminKey').value
+    if (!val) return
+    localStorage.setItem('adminKey', val)
+    document.getElementById('msgKey').style.display = 'block'
+    setTimeout(function() { document.getElementById('msgKey').style.display = 'none' }, 3000)
+  }
+
+  async function urlToUri(url) {
+    const m = url.match(/profile\/([^/]+)\/post\/([^/?]+)/)
+    if (!m) return null
+    const handle = m[1]
+    const rkey = m[2]
+    // Si ya es un DID, usarlo directamente
+    if (handle.startsWith('did:')) return 'at://' + handle + '/app.bsky.feed.post/' + rkey
+    // Si no, resolver el handle al DID
+    try {
+      const r = await fetch('https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=' + handle)
+      const d = await r.json()
+      return 'at://' + d.did + '/app.bsky.feed.post/' + rkey
+    } catch (e) {
+      return 'at://' + handle + '/app.bsky.feed.post/' + rkey
+    }
+  }
+
+  function showMsg(id, text, ok) {
+    const el = document.getElementById(id)
+    el.textContent = text
+    el.className = ok ? 'ok' : 'err'
+    el.style.display = 'block'
+    setTimeout(function() { el.style.display = 'none' }, 4000)
+  }
+
+  async function addPost() {
+    const url = document.getElementById('postUrl').value.trim()
+    const feedId = document.getElementById('feedInput').value.trim()
+    const uri = await urlToUri(url)
+    if (!uri) return showMsg('msg', '✗ URL no válida', false)
+    if (!feedId) return showMsg('msg', '✗ Escribe el ID del feed', false)
+    const r = await fetch(SERVER + '/admin/feeds/' + feedId + '/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': getKey() },
+      body: JSON.stringify({ uri: uri })
+    })
+    const d = await r.json()
+    if (d.ok) {
+      showMsg('msg', '✓ Post añadido', true)
+      document.getElementById('postUrl').value = ''
+    } else {
+      showMsg('msg', '✗ ' + (d.error || 'Error'), false)
+    }
+  }
+
+  async function loadPosts() {
+    const feedId = document.getElementById('feedInputPosts').value.trim()
+    if (!feedId) return
+    const r = await fetch(SERVER + '/admin/feeds/' + feedId + '/posts', {
+      headers: { 'x-admin-key': getKey() }
+    })
+    const posts = await r.json()
+    const list = document.getElementById('posts-list')
+    if (!posts.length) {
+      list.innerHTML = '<p style="color:#888;margin-top:8px">No hay posts</p>'
+      return
+    }
+    list.innerHTML = posts.map(function(p) {
+      return '<div class="post-item"><span class="post-uri">' + p.uri + '</span><button class="del-btn" onclick="deletePost(\'' + p.uri + '\', \'' + feedId + '\')">Eliminar</button></div>'
+    }).join('')
+  }
+
+  async function deletePost(uri, feedId) {
+    await fetch(SERVER + '/admin/feeds/' + feedId + '/posts', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': getKey() },
+      body: JSON.stringify({ uri: uri })
+    })
+    loadPosts()
+  }
+
+  async function changeIcon() {
+    const feedId = document.getElementById('iconFeedId').value.trim()
+    const appPassword = document.getElementById('iconAppPassword').value.trim()
+    const identifier = document.getElementById('iconIdentifier').value
+    const avatarFile = document.getElementById('iconAvatar').files[0]
+    if (!feedId || !appPassword || !avatarFile) return showMsg('msg4', '✗ Rellena todos los campos e incluye una imagen', false)
+    showMsg('msg4', '⏳ Actualizando icono...', true)
+    const avatarMimeType = avatarFile.type
+    const avatarBase64 = await new Promise(function(resolve) {
+      const reader = new FileReader()
+      reader.onload = function(e) { resolve(e.target.result.split(',')[1]) }
+      reader.readAsDataURL(avatarFile)
+    })
+    const r = await fetch(SERVER + '/admin/register-feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': getKey() },
+      body: JSON.stringify({ feedId, appPassword, identifier, avatarBase64, avatarMimeType })
+    })
+    const d = await r.json()
+    if (d.ok) {
+      showMsg('msg4', '✓ Icono actualizado correctamente', true)
+    } else {
+      showMsg('msg4', '✗ ' + (d.error || 'Error'), false)
+    }
+  }
+
+  async function registerFeed() {
+    const feedId = document.getElementById('regFeedId').value.trim()
+    const appPassword = document.getElementById('regAppPassword').value.trim()
+    const identifier = document.getElementById('regIdentifier').value
+    const avatarFile = document.getElementById('regAvatar').files[0]
+    if (!feedId || !appPassword) return showMsg('msg3', '✗ Rellena todos los campos', false)
+    showMsg('msg3', '⏳ Registrando...', true)
+
+    let avatarBase64 = null
+    let avatarMimeType = null
+    if (avatarFile) {
+      avatarMimeType = avatarFile.type
+      avatarBase64 = await new Promise(function(resolve) {
+        const reader = new FileReader()
+        reader.onload = function(e) { resolve(e.target.result.split(',')[1]) }
+        reader.readAsDataURL(avatarFile)
+      })
+    }
+
+    const r = await fetch(SERVER + '/admin/register-feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': getKey() },
+      body: JSON.stringify({ feedId, appPassword, identifier, avatarBase64, avatarMimeType })
+    })
+    const d = await r.json()
+    if (d.ok) {
+      showMsg('msg3', '✓ Feed registrado. Ábrelo y ancla con 📌: ' + d.url, true)
+    } else {
+      showMsg('msg3', '✗ ' + (d.error || 'Error'), false)
+    }
+  }
+
+  async function createFeed() {
+    const id = document.getElementById('newId').value.trim()
+    const name = document.getElementById('newName').value.trim()
+    const description = document.getElementById('newDesc').value.trim()
+    const did = document.getElementById('newDid').value
+    if (!id || !name) return showMsg('msg2', '✗ ID y nombre son obligatorios', false)
+    const r = await fetch(SERVER + '/admin/feeds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': getKey() },
+      body: JSON.stringify({ id: id, name: name, description: description, did: did })
+    })
+    const d = await r.json()
+    if (d.ok) {
+      showMsg('msg2', '✓ Feed creado', true)
+      const handle = did === 'TU-DID-CUENTA-1' ? 'tu-handle-1' : 'tu-handle-2'
+      const url = 'https://bsky.app/profile/' + handle + '/feed/' + id
+      const link = document.getElementById('feedUrlLink')
+      link.href = url
+      link.textContent = '→ Abrir en Bluesky y anclar con 📌: ' + url
+      document.getElementById('feedUrl').style.display = 'block'
+    } else {
+      showMsg('msg2', '✗ ' + (d.error || 'Error'), false)
+    }
+  }
+</script>
+</body>
+</html>
