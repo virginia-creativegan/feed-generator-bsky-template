@@ -36,9 +36,9 @@ Guarda el valor de `did` que aparece (tiene este formato: `did:plc:xxxxxxxxxxxxx
 
 ## PASO 2 — Descargar el código
 
-1. Ir a https://github.com/virginia-creativegan/mi-feed-bsky
+1. Ir a [https://github.com/virginia-creativegan/mi-feed-bsky](https://github.com/virginia-creativegan/feed-generator-bsky-template)
 2. Pulsar **Code → Download ZIP**
-3. Descomprimir en una carpeta, por ejemplo `C:\Users\TuUsuario\Documents\mi-feed-bsky`
+3. Descomprimir en una carpeta, por ejemplo `C:\Users\Usuario\Documents\mi-feed-bsky`
 
 ---
 
