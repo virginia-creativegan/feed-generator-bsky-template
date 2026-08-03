@@ -4,6 +4,8 @@ Servidor propio para gestionar colecciones manuales de posts de Bluesky, sin dep
 
 Cada colección aparece en tu perfil de Bluesky como un feed al que cualquiera puede suscribirse. Los datos se guardan en `data.json` dentro de tu propio repositorio de GitHub.
 
+Por favor, lee este documento antes de nada y sigue paso a paso el manual.
+
 ## Características
 
 - Interfaz web de administración
