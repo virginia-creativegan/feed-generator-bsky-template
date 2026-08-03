@@ -10,7 +10,6 @@ Por favor, lee este documento antes de nada y sigue paso a paso el manual.
 
 - Interfaz web de administración
 - Bookmarklet para añadir posts desde Bluesky con un clic
-- Soporte para múltiples cuentas de Bluesky
 - Iconos personalizados por feed
 - Datos persistentes en GitHub (no se pierden con reinicios del servidor)
 - Despliegue gratuito en Render.com
@@ -31,8 +30,8 @@ Sigue el manual paso a paso:
 
 Antes de subir a GitHub, edita `admin.html` y sustituye los placeholders por tus datos:
 
-- `TU-DID-CUENTA-1` y `TU-DID-CUENTA-2` → tus DIDs de Bluesky
-- `tu-handle-1` y `tu-handle-2` → tus handles de Bluesky
+- `TU-DID-CUENTA-1` (y/o `TU-DID-CUENTA-2`) → tu DIDs de Bluesky
+- `tu-handle-1` (y/o `tu-handle-2`) → tu handle de Bluesky
 
 ## Licencia
 
